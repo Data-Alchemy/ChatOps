@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "chatops"
+version = "0.1.0"
+description = "The ChatOps LLM Automation Framework is designed to operationalize the usage of Large Language Models (LLMs) by seamlessly integrating build, test, and deploy processes into a collaborative chat environment. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs."
+authors = ["Sebastian Hansen <sebastian.hansen@dataalchemy.dev>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+openai = "^0.28.1"
+tiktoken = "^0.5.1"
+pydantic = "^2.5.2"
+asyncio = "^3.4.3"
+python-dotenv = "^1.0.0"
+argparse = "^1.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
