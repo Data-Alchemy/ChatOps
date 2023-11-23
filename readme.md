@@ -113,7 +113,3 @@ Contributions are welcome! To contribute to the ChatOps framework, follow these 
 | **Streamlit Front End**              | Introduces a streamlined user interface using Streamlit, a Python library to enhance the overall user experience.   |
 | **API Mode for Task Management**     | - **Overview:** Introduce API-based triggering for tasks, providing a programmatic way to interact with and control the ChatOps framework.                              - **Key Benefits:** Enables automation, flexibility in task management, and seamless integration with other tools and systems.                                - **Implementation:** Integrates APIs, documents endpoints, implements security measures, and ensures scalability for future expansions.|
 
-
-## Conclusion
-
-These upcoming features are designed to elevate the ChatOps LLM Automation Framework, providing enhanced security, a more user-friendly interface through Streamlit, and advanced automation capabilities with the introduction of API mode. Stay tuned for these exciting developments that will further empower your experience with ChatOps.
