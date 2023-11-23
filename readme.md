@@ -103,16 +103,6 @@ Contributions are welcome! To contribute to the ChatOps framework, follow these 
 4. Push the changes to your fork.
 5. Create a pull request to the main repository.
 
-# Up
-
-Contributions are welcome! To contribute to the ChatOps framework, follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Make your changes and commit them.
-4. Push the changes to your fork.
-5. Create a pull request to the main repository.
-
 
 # Upcoming Features
 
