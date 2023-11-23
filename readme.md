@@ -118,6 +118,7 @@ Contributions are welcome! To contribute to the ChatOps framework, follow these 
 
 | Feature                              | Description                                                                                                                                                 |
 |--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **RAG**                                   | Will Add RAG using Chroma DB                                 |
 | **Run inside Docker**                | Ensures better security by allowing the ChatOps Large Language Model (LLM) Automation Framework to run inside Docker containers.                                 |
 | **Streamlit Front End**              | Introduces a streamlined user interface using Streamlit, a Python library to enhance the overall user experience.   |
 | **API Mode for Task Management**     | - **Overview:** Introduce API-based triggering for tasks, providing a programmatic way to interact with and control the ChatOps framework.                              - **Key Benefits:** Enables automation, flexibility in task management, and seamless integration with other tools and systems.                                - **Implementation:** Integrates APIs, documents endpoints, implements security measures, and ensures scalability for future expansions.|
