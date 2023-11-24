@@ -2,3 +2,4 @@ env/azure.env
 env/git.env
 env/llm.env
 .venv
+configs/data_objects/*

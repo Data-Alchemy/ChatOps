@@ -10,13 +10,15 @@ class CLI:
     def __init__(self):
         self.init = Bootstrap()
         self.parser = argparse.ArgumentParser(description="Your script description")
-        self.parser.add_argument("--objective_name", default="You are a helpful AI Assistant with extensive knowledge in programming, writing, and creative development.")
-        self.parser.add_argument("--tasks_and_data", nargs='+', default=[], help="Pairs of task and data values. Example: --tasks_and_data 'Task1' 'Data1' 'Task2' 'Data2'")
+        self.parser.add_argument("--objective_name",type=str, default="You are a helpful AI Assistant with extensive knowledge in programming, writing, and creative development.")
+        self.parser.add_argument("--tasks_and_data", nargs='+', default=[], help="Pairs of task and data values. Example: --tasks_and_data 'Task1' 'Data1' 'Task2' 'Data2'. When data file parameter is passed all tasks will use the same data file")
         self.parser.add_argument("--output_index", type=int, help="Index of the output to process. If not provided, processes the last output by default.")
         self.parser.add_argument("--overwrite_project", type=bool, default=False, help="Flag to indicate whether to overwrite the project.")
+        self.parser.add_argument("--data_file", type=str,default=None, help="Path to a file containing data values. When using this parameter only one file can be passed for all tasks")
 
         self.args = self.parser.parse_args()
 
+    
 
     def process_output(self, prompt_manager, output_index=None):
         if output_index is None:
@@ -34,19 +36,43 @@ class CLI:
         execution_results = processor.execute_code_blocks(code_blocks)
         logging.info(execution_results)
 
+    def load_data_from_file(self, file_path):
+        try:
+            with open(file_path, 'r') as file:
+                data = file.read()
+                # Assuming data values in the file
+                return data
+        except FileNotFoundError:
+            logging.error(f"File not found: {file_path}")
+            sys.exit(1)
+
+
     def main(self):
         #logging.info(self.init.cli_logo)
         user_roles = self.init.prompt_template
-        if len(self.args.tasks_and_data) % 2 != 0:
-            logging.info("Error: Pairs of task and data values are required.")
-            sys.exit(1)
-
         prompt_manager = Prompt_Manager(self.init.model_name, self.args.objective_name, [], "", user_roles)
+        
+        if self.args.data_file  != None :
+            # When data file is passed all tasks will have access to the same data loaded from the file#
+            for i in range(0, len(self.args.tasks_and_data), 2):
+                task_name = self.args.tasks_and_data[i]
+                data = self.load_data_from_file(self.args.data_file)
+                prompt_manager.add_task(task_name, data)
 
-        for i in range(0, len(self.args.tasks_and_data), 2):
-            task_name = self.args.tasks_and_data[i]
-            data = self.args.tasks_and_data[i + 1] if i + 1 < len(self.args.tasks_and_data) else None
-            prompt_manager.add_task(task_name, data)
+        else:
+
+            if len(self.args.tasks_and_data) % 2 != 0:
+                logging.info("Error: Pairs of task and data values are required.")
+                sys.exit(1)
+
+            for i in range(0, len(self.args.tasks_and_data), 2):
+                task_name = self.args.tasks_and_data[i]
+                data = self.args.tasks_and_data[i + 1] if i + 1 < len(self.args.tasks_and_data) else None
+                prompt_manager.add_task(task_name, data)
+
+
+
+
 
         plan_result = prompt_manager.plan()
         prompt_manager.main()

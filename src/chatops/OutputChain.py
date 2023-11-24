@@ -27,7 +27,7 @@ class CodeProcessor:
             'css', 'scss', 'less',
             'txt', 'log', 'pdf', 'docx', 'xlsx', 'pptx',
             'jpg', 'jpeg', 'png', 'gif', 'svg', 'mp3', 'mp4', 'avi', 'mov',
-            'zip', 'tar', 'gz', 'markdown' , 'text', 'txt'
+            'zip', 'tar', 'gz', 'markdown' , 'text', 'txt', 'tf', 'hcl' , 'terraform' , 'xml' , 'sql'
 
         ]
         
@@ -67,7 +67,10 @@ class CodeProcessor:
             'toml'          : 'toml',
             'conf'          : 'conf',
             'env'           : 'env',
-            'csv'           : 'csv'
+            'csv'           : 'csv',
+            'hcl'           : 'tf' , 
+            'terraform'     : 'tf',
+            'xml'           : 'xml'
         }
 
     def setup_logging(self):
@@ -197,7 +200,7 @@ class CodeProcessor:
 
         return json.dumps(results, indent=4)
     
-''' 
+'''
 # Sample Usage #
 input_string = """
 Here is some text before the code block.
@@ -209,6 +212,15 @@ console.log("Hello, World!");
 ```powershell
 (Invoke-WebRequest -Uri "https://www.google.com").Links.Href
 ```
+```
+~File_Name:Wikipedia~
+```powershell
+(Invoke-WebRequest -Uri "https://simple.wikipedia.org/wiki/Main_Page").Links.Href
+```
+~File_Name:javascript~
+```shell
+print(1+a)
+```
 
 """
 
@@ -216,5 +228,4 @@ processor = CodeProcessor(output_location="output")
 code_blocks = processor.parse_code_blocks(input_string)
 print(code_blocks)
 execution_results = processor.execute_code_blocks(code_blocks)
-print(execution_results)
-'''  
+print(execution_results)'''
