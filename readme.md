@@ -93,7 +93,7 @@ To set up the ChatOps framework, follow these steps:
 
 ## ChatFrames
 
->ChatFrames are the main in memory data structures of a chat chain. This is how chats share data between chats. All in memory operations happen with ChatFrames up until writting to disk.
+>ChatFrames are the main in memory data structures of a chat chain. This is how chains share data between chat instances. All in memory operations happen with ChatFrames up until writting to disk.
 
 ![Alt text](documentation/ChainFrame.png)
 
