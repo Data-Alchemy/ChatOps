@@ -75,7 +75,10 @@ class Prompt_Manager:
         - *Always wrap your code output with ``` ```
         - Always specify the programming language right after ``` for example: ```python
         - *when writting markdown files put everything inside ``` ``` code wrapper for example ```markdown ```. Don't add any other ``` for sections inside the markdown instead use ` `
-
+        - Dont specify file extensions
+        - don't specify pip install just write the requirements
+        - remember that requirements.txt should be ```text not ```python
+        - Dont add explanation or comments outside the readme file don't repeat the instructions you get.
 
         """
         self.model_name = model_name
@@ -206,12 +209,12 @@ class Prompt_Manager:
             messages = prompt
 
             
-            if attempt == 0 and self.init_prompt == 0:
-                # Add output Configs #
-                messages.append({
-                    "role": "system",
-                    "content": json.dumps(f"{self.prompt_configurations}")
-                })
+            #if attempt == 0 and self.init_prompt == 0:
+            # Add output Configs #
+            messages.append({
+                "role": "system",
+                "content": json.dumps(f"{self.prompt_configurations}")
+            })
 
 
             self.init_prompt +=1
@@ -236,6 +239,7 @@ class Prompt_Manager:
                 task_name = self.iter
                 self.tmp[task_name] = output
                 self.iter +=1
+                print(output)
                 return output
             except Exception as e:
                 logging.error(f'Retry {attempt}/{retry} failed. Error: {e}')

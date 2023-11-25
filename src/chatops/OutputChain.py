@@ -11,11 +11,12 @@ class CodeProcessor:
     """
     Asynchronous class to process code responses and validate their format and content.
     """
-    def __init__(self, output_location="output", output_project:str ="bot", overwrite_project = False, max_retries: int = 3):
+    def __init__(self, output_location="output", output_project:str ="bot", overwrite_project = False, max_retries: int = 3, no_test:bool =False):
         """
         Initializes the CodeProcessor with a maximum number of retries and an output location.
         """
-        self.setup_logging()
+
+        self.no_test = no_test
         self.max_retries = max_retries
         self.output_location = output_location
         self.output_project = output_project
@@ -27,7 +28,7 @@ class CodeProcessor:
             'css', 'scss', 'less',
             'txt', 'log', 'pdf', 'docx', 'xlsx', 'pptx',
             'jpg', 'jpeg', 'png', 'gif', 'svg', 'mp3', 'mp4', 'avi', 'mov',
-            'zip', 'tar', 'gz', 'markdown' , 'text', 'txt', 'tf', 'hcl' , 'terraform' , 'xml' , 'sql'
+            'zip', 'tar', 'gz', 'markdown' , 'text', 'txt', 'tf', 'hcl' , 'terraform' , 'xml' , 'sql' ,'env'
 
         ]
         
@@ -70,14 +71,11 @@ class CodeProcessor:
             'csv'           : 'csv',
             'hcl'           : 'tf' , 
             'terraform'     : 'tf',
-            'xml'           : 'xml'
+            'xml'           : 'xml',
+            'json'          : 'json',
+            'env'           : 'env'
         }
 
-    def setup_logging(self):
-        """
-        Placeholder for logging setup. You should implement this method based on your logging needs.
-        """
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
     def extract_code_blocks(self, input_string):
         """
@@ -100,23 +98,26 @@ class CodeProcessor:
         pattern = r'#~(.*?)~'
         return re.findall(pattern, input_string)
 
-    def parse_code_blocks(self, input_string):
+    def parse_code_blocks(self, input_string, file_name:str = None):
         """
         Parse code blocks from the input string and return them as a dictionary.
         The dictionary has the key from the 'File_Name' and a dictionary with 'app_type' and 'code_content'.
         """
-        code_dict = {}
-        code_pattern = r'```(\S+)\s*([\s\S]*?)```'
-        file_name_pattern = r'~File_Name:(.*?)~'
+        if file_name == None:
+            code_dict = {}
+            code_pattern = r'```(\S+)\s*([\s\S]*?)```'
+            file_name_pattern = r'~File_Name:(.*?)~'
 
-        # Find all File_Name matches in the input_string
-        file_name_matches = re.findall(file_name_pattern, input_string)
+            # Find all File_Name matches in the input_string
+            file_name_matches = re.findall(file_name_pattern, input_string)
 
-        # Find all code matches in the input_string
-        code_matches = re.findall(code_pattern, input_string, re.DOTALL)
+            # Find all code matches in the input_string
+            code_matches = re.findall(code_pattern, input_string, re.DOTALL)
 
-        for file_name, (app_type, code_content) in zip(file_name_matches, code_matches):
-            code_dict[file_name] = {'app_type': app_type, 'code_content': code_content.strip()}
+            for file_name, (app_type, code_content) in zip(file_name_matches, code_matches):
+                code_dict[file_name] = {'app_type': app_type, 'code_content': code_content.strip()}
+        else:
+            ""
 
         return code_dict
 
@@ -159,10 +160,14 @@ class CodeProcessor:
             file.write(code_content)
 
 
-    def execute_code_blocks(self, code_dict):
+    def execute_code_blocks(self, code_dict, output_file:str = None, output_app_type:str = None):
         """
         Execute code blocks using subprocess and return the results.
         """
+        if (output_file is None and output_app_type is not None) or (output_file is not None and output_app_type is None):
+            raise ValueError("Both output_file and output_app_type must be provided together when passed")
+
+
         results = {}
 
         for key, value in code_dict.items():
@@ -171,7 +176,7 @@ class CodeProcessor:
             result = {'code_executed': code_content, 'status': '', 'result': '', 'app_type': app_type}
 
             # Check if the app_type is in the list of languages to save directly
-            if app_type.lower() in self.non_executables:
+            if app_type.lower() in self.non_executables or self.no_test:
                 # Save code directly without execution
                 self.save_code_to_file(key, app_type, code_content)
                 result['status'] = 'saved_directly'
@@ -185,7 +190,11 @@ class CodeProcessor:
 
                     # Save code to file if execution is successful
                     if result['status'] == 'completed':
-                        self.save_code_to_file(key, app_type, code_content)
+                        
+                        if output_file == None:
+                            self.save_code_to_file(key, app_type, code_content)
+                        else :
+                            self.save_code_to_file(output_file, output_app_type, code_content)
 
                 except subprocess.CalledProcessError as e:
                     result['status'] = 'failed'
@@ -228,4 +237,5 @@ processor = CodeProcessor(output_location="output")
 code_blocks = processor.parse_code_blocks(input_string)
 print(code_blocks)
 execution_results = processor.execute_code_blocks(code_blocks)
-print(execution_results)'''
+print(execution_results)
+'''
