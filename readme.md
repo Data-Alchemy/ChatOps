@@ -28,7 +28,7 @@ The ChatOps LLM Automation Framework is designed to operationalize the usage of 
 
 4. **Contextual Task Execution with Prompt Roles:**
    - Utilizes **prompt roles** as contextual windows for tasks.
-   - Allows execution of a single task by multiple contexts (programmer, QA, manager, etc.), fostering collaboration.
+   - Allows execution of a single task by multiple contexts (programmer, QA, manager, etc.).
    - Iteratively works on specified tasks within a context, referred to as a **chain** by ChatOps, sharing output between phases.
 ## Table of Contents
 
