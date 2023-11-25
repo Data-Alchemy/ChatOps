@@ -8,7 +8,8 @@
 
 # ChatOps: LLM Automation Framework
 
-The ChatOps LLM Automation Framework is designed to operationalize the usage of Large Language Models (LLMs) by integrating build, test, and deploy processes. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs. ChatOps runs and tests your code before generating it to make sure it is functional.
+![Alt text](documentation/ChatOps-HelloWorld.png)
+The ChatOps LLM Automation Framework is designed to operationalize the usage of Large Language Models (LLMs) by integrating build, test, and deploy processes. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs. ChatOps runs and tests your code after llm generation to make sure it is functional.
 
 ## Advantages of ChatOps
 
@@ -124,7 +125,7 @@ Run the ChatOps cli using the main script ` poetry run ChatOps.py`. Here are the
 |---------------------|-----------|-----------|-------------------------------------------------------------------------------------------------------------|
 | `--project_name`    | String    | "bot"     | The name of your project. It will be used to store the output of the prompt. (Optional, defaults to "bot")  |
 | `--objective_name`  | String    | -         | Your AI assistant's objective description.                                                                 |
-| `--tasks_and_data`  | List      | []        | Pairs of task and data values. Example: `--tasks_and_data 'Task1' 'Data1' 'Task2' 'Data2'`.                 |
+| `--tasks_and_data`  | List      | []        | Pairs of task and data values. Example: `--tasks_and_data 'Task1' 'Data1' 'Task2'  'Data2'` Data can be provided directly for simple inputs or as a file path which will read the file and pass it into the chat context for the specific task.                 |
 | `--output_index`    | String    | None      | Index of the output to process. If not provided, processes the last output by default.                      |
 | `--overwrite_project`| Boolean  | False     | Flag to indicate whether to overwrite the project.                                                         |
 | `--data_file`       | String    | None      | Path to a file containing data values. When using this parameter, data file will be available globally to all tasks|
