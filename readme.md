@@ -8,7 +8,7 @@
 
 # ChatOps: LLM Automation Framework
 
-The ChatOps LLM Automation Framework is designed to operationalize the usage of Large Language Models (LLMs) by seamlessly integrating build, test, and deploy processes into a collaborative chat environment. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs. ChatOps runs and tests your code before generating it to make sure it is functional.
+The ChatOps LLM Automation Framework is designed to operationalize the usage of Large Language Models (LLMs) by integrating build, test, and deploy processes. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs. ChatOps runs and tests your code before generating it to make sure it is functional.
 
 ## Advantages of ChatOps
 
