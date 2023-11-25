@@ -75,6 +75,7 @@ To set up the ChatOps framework, follow these steps:
 
 
 # Usage
+![Alt text](documentation/ChatOps-Cli-Demo.gif)
 
 > Here is some basic information about using ChatOps cli
 
