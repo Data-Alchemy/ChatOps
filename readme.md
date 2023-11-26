@@ -6,31 +6,17 @@
   \/_____/   \/_/\/_/   \/_/\/_/     \/_/   \/_____/   \/_/     \/_____/ 
 ```                                                                        
 
-# ChatOps: LLM Automation Framework
+# ChatOps: Prompt Engineering Framework
 
 ![Alt text](documentation/ChatOps-HelloWorld.png)
 
-The ChatOps CLI is designed to operationalize the usage of Large Language Models (LLMs) by integrating build, test, and deploy processes. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs. ChatOps can run and tests your code after llm generation to make sure it is functional.
+The ChatOps CLI was built to simplify the prompt engineering process. With ChatOps cli you can streamline the development lifecycle, providing an efficient workflow for planning, coding, testing, and deploying code using LLMs. ChatOps can run and tests your code after llm generation to make sure it is functional.
 
-## Advantages of ChatOps
-
-1. **Operational Efficiency:**
-   - Enhances the overall development lifecycle with an automated workflow for planning, coding, testing, and deploying code using LLMs.
-   - By default any code generated for a specific ChatOps project will be stored in a versioned folder, everytime you re run your project it will generate a new version *( can be changed to overite = True for git managed versioning)*
-
-2. **Simplified LLM Usage:**
-   - Abstracts and simplifies complex processes in prompt engineering.
-   - Has **Chain Planning**, enabling the simulation of chat messages without actual LLM execution. This lets you visualize your prompt chains and see token usage estimates.
-
-3. **Lazy Evaluation:**
-   - Implements lazy evaluation on tasks, allowing users to accumulate and visualize tasks concurrently.
-   - Prompt tasks are added to a queue but are not executed until main is called.
-
-4. **Contextual Task Execution with Prompt Roles:**
-   - Utilizes **prompt roles** as contextual windows for tasks.
-   - Allows execution of a single task by multiple contexts (programmer, QA, manager, etc.).
-   - Iteratively works on specified tasks within a context, referred to as a **chain**, sharing output between phases.
-   - Data can be provided to all tasks as a global object or at the individual task level.
+With ChatOps you will be able to:
+   - Create and reuse chat chains 🔗 to build executable workflows and combine them with non llm code execution
+   - Run code in real time and build self healing code 🩹. Your chains can be configured to repair code and react to errors.
+   - Configure chains to evalutate your processes and act as a quality tester.
+   - Quickly iterate by building templates and passing your data as arguments or files. 
 
 ## Table of Contents
 
