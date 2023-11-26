@@ -10,7 +10,7 @@
 
 ![Alt text](documentation/ChatOps-HelloWorld.png)
 
-The ChatOps LLM Automation Framework is designed to operationalize the usage of Large Language Models (LLMs) by integrating build, test, and deploy processes. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs. ChatOps runs and tests your code after llm generation to make sure it is functional.
+The ChatOps CLI is designed to operationalize the usage of Large Language Models (LLMs) by integrating build, test, and deploy processes. This framework aims to streamline the development lifecycle, providing an efficient and automated workflow for planning, coding, testing, and deploying code using LLMs. ChatOps can run and tests your code after llm generation to make sure it is functional.
 
 ## Advantages of ChatOps
 
@@ -20,20 +20,21 @@ The ChatOps LLM Automation Framework is designed to operationalize the usage of 
 
 2. **Simplified LLM Usage:**
    - Abstracts and simplifies complex processes in prompt engineering.
-   - Features the innovative **Chain Planning**, enabling the simulation of chat messages without actual LLM dispatch and providing insightful token usage estimates.
+   - Has **Chain Planning**, enabling the simulation of chat messages without actual LLM execution. This lets you visualize your prompt chains and see token usage estimates.
 
-3. **Lazy Evaluation for Enhanced Workflow:**
+3. **Lazy Evaluation:**
    - Implements lazy evaluation on tasks, allowing users to accumulate and visualize tasks concurrently.
-   - Tasks are processed concurrently and asynchronously, optimizing the execution pipeline for increased efficiency.
+   - Prompt tasks are added to a queue but are not executed until main is called.
 
 4. **Contextual Task Execution with Prompt Roles:**
    - Utilizes **prompt roles** as contextual windows for tasks.
    - Allows execution of a single task by multiple contexts (programmer, QA, manager, etc.).
-   - Iteratively works on specified tasks within a context, referred to as a **chain** by ChatOps, sharing output between phases.
+   - Iteratively works on specified tasks within a context, referred to as a **chain**, sharing output between phases.
+   - Data can be provided to all tasks as a global object or at the individual task level.
+
 ## Table of Contents
 
 - [Setup](#setup)
-- [Configuration](#configuration)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Plan Function](#plan-function)
