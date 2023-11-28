@@ -121,9 +121,11 @@ class CLI:
 
             if os.path.isfile(data_or_file):
                 data = self.load_data_from_file(data_or_file)
+                if len(data) <1 or data == None :
+                    raise FileNotFoundError(f"{data_or_file} does not exist or is empty")
             else:
                 data = data_or_file
-
+            print('---------------------------------------------',data)
             self.prompt_manager.add_task(task_name, data)
 
     def process_output(self, output_index=None, output_override=None):

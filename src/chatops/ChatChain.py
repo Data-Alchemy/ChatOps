@@ -325,6 +325,6 @@ if __name__ == "__main__":
     plan_result = prompt_manager.plan()
     # [print(i['Programmer']) for i in prompt_manager.plan_results]
     #print(plan_result)
-    prompt_manager.main()
+    #prompt_manager.main()
     [print(i) for k,i in prompt_manager.tmp.items()]
-'''
+    print(plan_result)'''

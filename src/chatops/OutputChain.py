@@ -73,7 +73,6 @@ class CodeProcessor:
             'terraform'     : 'tf',
             'xml'           : 'xml',
             'json'          : 'json',
-            'env'           : 'env'
         }
 
 

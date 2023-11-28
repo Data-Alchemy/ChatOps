@@ -6,6 +6,7 @@
   \/_____/   \/_/\/_/   \/_/\/_/     \/_/   \/_____/   \/_/     \/_____/ 
 ```                                                                        
 
+
 # ChatOps: Prompt Engineering Framework
 
 ![Alt text](documentation/ChatOps-HelloWorld.png)
@@ -17,6 +18,10 @@ With ChatOps you will be able to:
    - Run code in real time and build self healing code 🩹. Your chains can be configured to repair code and react to errors.
    - Configure chains to evalutate your processes and act as a quality tester.
    - Quickly iterate by building templates and passing your data as arguments or files. 
+
+
+# Solution Diagram
+![Solution Diagram](https://lucid.app/publicSegments/view/22a8d723-7839-49a3-a958-d93c04d1ea3d/image.png)
 
 ## Table of Contents
 
