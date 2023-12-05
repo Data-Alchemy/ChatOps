@@ -159,6 +159,12 @@ Run the ChatOps cli using the main script ` poetry run ChatOps.py`. Here are the
    ![Alt text](documentation/ChatOps-Databricks-Docker.png)
    ![Alt text](documentation/ChatOps-Databricks-Docker-Output.png)
 
+## Additional Notes 
+- ChatOps is capable of handling some level of rule breaking events like asking it to ignore rules. This will avoid eternal loops
+    ![Alt text](documentation/ignore_rules_example.png)
+    
+- ChatOps handles infite loops by limiting retries to 3 by default 
+
 # Contributing
 
 Contributions are welcome! To contribute to the ChatOps framework, follow these steps:

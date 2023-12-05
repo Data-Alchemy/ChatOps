@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<configuration>
+
+  <!-- Hive Metastore Configuration -->
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:derby:;databaseName=metastore_db;create=true</value>
+    <description>JDBC URL for the Hive Metastore database.</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.apache.derby.jdbc.EmbeddedDriver</value>
+    <description>Driver class name for the Hive Metastore database.</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>APP</value>
+    <description>Username for the Hive Metastore database.</description>
+  </property>
+
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>mine</value>
+    <description>Password for the Hive Metastore database.</description>
+  </property>
+
+  <property>
+  <name>hive.stats.jdbc.timeout</name>
+  <value>300</value> <!-- Set an appropriate timeout value -->
+  <description>Timeout for JDBC operations during statistics collection.</description>
+</property>
+
+<property>
+  <name>hive.stats.retries.wait</name>
+  <value>1</value> <!-- Set an appropriate retry wait value -->
+  <description>Wait time between retries during statistics collection.</description>
+</property>
+
+<property>
+  <name>hive.metastore.schema.verification</name>
+  <value>true</value>
+  <description>Enable schema versioning</description>
+</property>
+
+<property>
+  <name>hive.metastore.schema.verification.record.version</name>
+  <value>2.3.0</value> <!-- Set the correct version based on your Hive Metastore version -->
+  <description>Recorded schema version</description>
+</property>
+
+</configuration>

@@ -1,22 +1,20 @@
+from typing import List, Dict, ClassVar
+from dotenv import load_dotenv
+from datetime import datetime
+#import OutputFrames
+import tiktoken
 import asyncio
-import concurrent.futures
 import logging
+import openai
 import json
 import os
-from datetime import datetime
-from pydantic import BaseModel
-from typing import List, Dict
-import tiktoken
-import openai
-from dotenv import load_dotenv
-
+import re
 
 # Get the absolute path to the .env file using the current script's directory
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'env', 'llm.env'))
 
 # Load Environment file
 load_dotenv(env_path)
-
 
 
 azure_openai_key = os.getenv("azure_openai_key")
@@ -33,67 +31,61 @@ openai.api_type = azure_openai_api_type
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] [%(name)s] - %(message)s')
 
 
-class Item(BaseModel):
-    name: str
-
-
-class Task(BaseModel):
-    name: str
-    items: List[Item]
-    metadata: dict
-
-
-class Objective(BaseModel):
-    name: str
-    objective: str  # High-level objective
-    tasks: Dict[str, List[str]]  # Change tasks to a dictionary
-    data: str  # Add a data attribute for the task-specific data
-
-
-class RoleTask(BaseModel):
-    role: str
-    instructions: List[str]
-
 
 class Prompt_Manager:
-    def __init__(self,model_name, objective_name, task_name, data, roles):
+    def __init__(self,model_name, objective_name, context, data, roles):
         """
         Initializes the Prompt_Manager instance.
 
         Args:
             objective_name (str): Name of the objective.
-            task_name (str): Name of the task.
+            context (str): Name of the task.
             data (str): Task-specific data.
             roles (dict): Dictionary of user roles and their corresponding instructions.
         """
 
         self.prompt_configurations ="""
         Strictly follow these rules :
-        - Always generate a folder structure comment on line one of your output in this format #~Folder_Name:Microsoft/Compute~ where the first section is the Program and the second is the usage
-        - Always generate a file name as a comment at the top of your output based on what the request was using this format #~File_Name:Hello_World~
-        - *The #~Folder_Name:~ and #~File_Name~ should be placed before each initial ``` and should be added for every code section that needs to be saved to a file
-        - *Always wrap your code output with ``` ```
-        - Always specify the programming language right after ``` for example: ```python
-        - *when writting markdown files put everything inside ``` ``` code wrapper for example ```markdown ```. Don't add any other ``` for sections inside the markdown instead use ` `
-        - Dont specify file extensions
+            You are now a ai at ChatOps. At chatops we use the concept of chatFrames to communicate with other AI's.
+            You will strictly adhere to this communication format. Focus on just completing the specified task dont add aditional comment on your output. Make sure every single file is output as a chatFrame and that all required files are present 
+            ChatFrames are json objects structured like this 
+            {'FileName': {'response': ``` your response here``` ,'status': '', 'result'': '', 'app_type':'', 'path':''}}
+            FileName: Name of the File to save response to
+            status: status of response should always say pending validation
+            result: should be empty
+            app_type: specifies the program for executing or storing the file , ie : python, java, txt
+            path: specifies a logical relative output directory to save the content ie './env/' for environment files.
+            *from now on you will strictly communicate in this format*
+            every single item you output should be formatted in a ChatFrame.
+            Chat can be composed of multiple chat frames like this 
+            {'Readme': {'response': ``` this is a sample markdown``` ,'status': 'pending_validation', 'result'': '', 'app_type':'markdown'' , 'path':'.'}}
+            {'pytest': {'response': ``` assert 1=1``` ,'status': 'pending_validation', 'result'': '', 'app_type':'python'' , 'path':'./src'}}
+            {'requirements': {'response': ```pandas``` ,'status': 'pending_validation', 'result'': '', 'app_type':'python'' , 'path':'.'}}
+            failure to do so will result in a penalty 
+            compliance will result in a prize
+            Every output file should have a chatframe 
+
         - don't specify pip install just write the requirements
-        - remember that requirements.txt should be ```text not ```python
+        - remember that requirements.txt should be app_type:text not app_type:python
         - Dont add explanation or comments outside the readme file don't repeat the instructions you get.
 
         """
+
         self.model_name = model_name
         self.objective_name = objective_name
-        self.task_name = task_name
+        self.context = context
         self.data = data
         self.roles = roles
         self.task_collection = {}
         self.plan_results = []
-        self.completions = []
-        self.tmp = {}
+        self.raw_completions = []
+        self.validated_completions = []
+        self.ChatFrames = []
         self.iter = 0
         self.init_prompt = 0 
-
-    def add_task(self, task_name: str, data) -> list:
+        self.expected_keys = ["response", "status", "result", "app_type", "path"]
+   
+    def add_task(self, task_name: str, data) -> dict:
         """
         Adds a task to the task collection.
 
@@ -105,34 +97,12 @@ class Prompt_Manager:
             list: List of tasks.
         """
         logging.info(f"Adding Task: '{task_name}' to task list")
-        self.task_collection[task_name] = data
-
-    def num_tokens_from_string(self, string: str, encoding) -> int:
-        """
-        Calculates the number of tokens in a given string.
-
-        Args:
-            string (str): Input string.
-            encoding: Encoding method.
-
-        Returns:
-            int: Number of tokens.
-        """
+        self.task_collection[task_name]= {'task': task_name, 'data':data , 'result': '', 'status': 'new',  'app_type': 'chain', 'path': ''}
+    
+    def count_tokens(self, string: str, model="gpt-3.5-turbo")-> int:
+        encoding = tiktoken.encoding_for_model(model)
         num_tokens = len(encoding.encode(string))
         return num_tokens
-
-    def count_tokens(self, text, encoding):
-        """
-        Counts the number of tokens in the given text.
-
-        Args:
-            text: Input text.
-            encoding: Encoding method.
-
-        Returns:
-            int: Number of tokens.
-        """
-        return self.num_tokens_from_string(text, encoding)
 
     def plan(self, model="gpt-3.5-turbo"):
         """
@@ -150,9 +120,16 @@ class Prompt_Manager:
             logging.info(f" -Executing Task: {task}")
             role_results = {}
             total_tokens = 0
+
             for role, instructions in self.roles.items():
                 content = []
                 logging.info(f"  - Executing Task as Role: {role}")
+                content.append({
+                    "role": "system",
+                    "content": str({
+                        "Objective":f'{self.objective_name}',
+                    })
+                })
                 # Add system role for instruction
                 for instruction in instructions:
                     content.append({
@@ -161,7 +138,7 @@ class Prompt_Manager:
                             "Instruction": f'{instruction}'
                         })
                     })
-                    total_tokens = self.count_tokens(str(instruction), tiktoken.encoding_for_model(model))
+                    total_tokens = self.count_tokens(instruction, model)
 
                 # Add user role for task
                 content.append({
@@ -174,25 +151,44 @@ class Prompt_Manager:
                 })
 
                 role_results[role] = content
-                total_tokens += self.count_tokens(str(content), tiktoken.encoding_for_model(model))
+                total_tokens += self.count_tokens(str(content), model)
 
-            # Add system role for objective
-            role_results["system"] = [{
-                "role": "system",
-                "content": str({
-                    "Objective": self.objective_name
-                })
-            }]
-            total_tokens += self.count_tokens(str(self.objective_name), tiktoken.encoding_for_model(model))
             role_results['token_usage'] = total_tokens
-
             self.plan_results.append(role_results)  # Append results for the current task
 
         # Use json.dumps for formatting with indent 4
         formatted_results = json.dumps(self.plan_results, indent=4)
         return formatted_results
 
-    async def chain_completions(self, prompt, retry=3, previous_data=None):
+
+    async def static_completions(self, prompt:str):
+
+        messages = []
+        #sys messages #
+        messages.append({
+                    "role": "system",
+                    "content": str({
+                        "Objective":f'{self.prompt_configurations}',
+                    })
+                })
+        #user messages
+        messages.append({"role": "user",
+          "content": f"{str(prompt)}"
+        })
+
+        prompt_response = await asyncio.to_thread(
+        openai.ChatCompletion.create,
+        temperature=0.1,
+        engine=self.model_name,
+        messages=messages
+        )
+        response = prompt_response['choices'][0]['message']['content']
+        results = await self.parse_completions(response)
+        [self.raw_completions.append(f"'{i}'") for i in results]
+        return results
+    
+
+    async def chain_completions(self, prompt, retry=3, previous_data=None , role:str = 'sys'):
         """
         Chains completions asynchronously.
 
@@ -208,16 +204,11 @@ class Prompt_Manager:
         while attempt <= retry:
             messages = prompt
 
-            
-            #if attempt == 0 and self.init_prompt == 0:
             # Add output Configs #
             messages.append({
                 "role": "system",
                 "content": json.dumps(f"{self.prompt_configurations}")
             })
-
-
-            self.init_prompt +=1
 
             if previous_data:
                 messages.append({
@@ -232,21 +223,39 @@ class Prompt_Manager:
                 messages=messages
             )
 
-            try:
-                output = prompt_response['choices'][0]['message']['content']
-                self.completions.append(output)
+            response = prompt_response['choices'][0]['message']['content']
 
-                task_name = self.iter
-                self.tmp[task_name] = output
-                self.iter +=1
-                print(output)
-                return output
+            try:
+                results = await self.parse_completions(response)
+                [self.raw_completions.append(f"'{i}'") for i in results]
+                return results  # Exit the loop if successful
+
             except Exception as e:
-                logging.error(f'Retry {attempt}/{retry} failed. Error: {e}')
-                attempt += 1
+                logging.error(f'Retry {attempt}/{retry} failed. Error: {e} \n {response}')
+                attempt += 1  # Increment attempt counter
 
         raise Exception(f"Failed after {retry} retries.")
 
+
+    
+    async def parse_completions(self, response: str) -> list:
+        pattern = re.compile(r'({.+?}})', re.DOTALL)
+        
+        try:
+            matches = pattern.findall(response)
+            output_size = len(matches)
+            logging.info(f'Parsed Output(s): {output_size}')
+
+            if output_size == 0:
+                logging.warning(f'IoError: no output found, received: \n {response}')
+                print('\n')
+                logging.error(matches)
+
+        except Exception as e:
+            logging.error(f'unable to parse completions, error is: {e}')
+
+        return matches
+    
     async def async_main(self):
         """
         Asynchronous main function to process tasks concurrently.
@@ -257,34 +266,37 @@ class Prompt_Manager:
                 if role != 'token_usage':
                     self.init_prompt = 0
                     prompt = content
-                    previous_data = self.completions[-1] if self.completions else None
+                    previous_data = self.raw_completions[-1] if self.raw_completions else None
+                    tasks.append(self.chain_completions(prompt, previous_data=previous_data, role=role))
 
-                    # Append the coroutine to the list, not the result of the coroutine
-                    tasks.append(self.chain_completions(prompt, previous_data=previous_data))
-
-            # Await all tasks concurrently and gather the results
             results = await asyncio.gather(*tasks)
             return results
 
         # Process all tasks concurrently and gather the results
         results = await asyncio.gather(*[process_task(task_results) for task_results in self.plan_results])
         return results
+    
 
-    def main(self):
+    def main(self, output_project:str = 'Sample'):
         """
         Main function to execute tasks.
         """
         logging.info(f"-Starting Main Class-")
         start_time = datetime.now()
-        new_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(new_loop)
-        loop = asyncio.get_event_loop()
-        results = loop.run_until_complete(self.async_main())
+        logging.info('Collecting responses from model')
+        try:
+            results =   asyncio.run(self.async_main())
+            #results = asyncio.run(self.static_completions(prompt))
+
+        except Exception as e:
+            logging.error(f"Completion processing failed , error is : {e}")
+
         end_time = datetime.now()
         duration = end_time - start_time
         logging.info(f"Total execution time: {duration} ⏳")
-        logging.info(f"Total tasks executed: {len(self.tmp)} ✅")
+        logging.info(f"Total tasks executed: {len(self.raw_completions)} ✅")
         logging.info(f"-Finished Running Main Class-")
+        return results
 
 '''
 # Example usage:
@@ -301,30 +313,14 @@ if __name__ == "__main__":
 
 }
 
-
     objective_name = "You are a helpful AI Assistant with extensive knowledge in programming, writting and creative development."
-    task_name = """
+    context = """
     Make sure to take a deep breath and activate your innate space for whatever task the user provides. 
     Before executing the request breakdown the request into clear actions with desired outcome, then execute on those actions make sure to always think about the objective of the user
     """
     data = ""
-
-    prompt_manager = Prompt_Manager(model_name, objective_name, task_name, data, user_roles)
-    data = """
-
-    """
-    prompt_manager.add_task('write a markdown document for snowflake usage', data)
-    # prompt_manager.add_task('create a vnet', '')
-
-    # Example calls
-    """result = prompt_manager.main()
-    print("Execution Results:")
-    for role_results in result:
-        print(role_results)"""
-
+    prompt_manager = Prompt_Manager(model_name, objective_name, context, data, user_roles)
+    prompt_manager.add_task('create a docker project with docker compose for running spark , with hive, apache derby and one persistent volume, create a spark database and table', data)
     plan_result = prompt_manager.plan()
-    # [print(i['Programmer']) for i in prompt_manager.plan_results]
-    #print(plan_result)
-    #prompt_manager.main()
-    [print(i) for k,i in prompt_manager.tmp.items()]
-    print(plan_result)'''
+    prompt_manager.main('Spark')
+'''   

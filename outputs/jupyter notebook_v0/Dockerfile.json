@@ -1,0 +1,7 @@
+{
+    "name": "PySpark Dev Container",
+    "dockerFile": "Dockerfile",
+    "forwardPorts": [8888],
+    "postCreateCommand": "pip install -r requirements.txt",
+    "extensions": ["ms-python.python", "ms-toolsai.jupyter"]
+}
